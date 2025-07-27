@@ -50,7 +50,7 @@ sudo apt install pulseaudio-utils python3 python3-hid
 Clone this repo and cd into it
 
 ```
-git clone https://git.dymstro.nl/Dymstro/nova-chatmix-linux.git
+git clone https://github.com/ronilaukkarinen/nova-chatmix-linux.git
 cd nova-chatmix-linux
 ```
 
