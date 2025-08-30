@@ -48,14 +48,13 @@ sudo apt install pulseaudio-utils python3 python3-hid
 Clone this repo and cd into it
 
 ```bash
-git clone https://git.dymstro.nl/Dymstro/nova-chatmix-linux.git
 cd nova-chatmix-linux
+## Copies nova.py to ~/.local/bin, adds udev rules, and creates/starts the systemd service for the user
+# You will be prompted for the root password where required
+./scripts/install.sh
 ```
 
-To be able to run the script as a non-root user, some udev rules need to be applied. This will allow regular users to access the base station USB device. It also starts the script when it gets plugged in (only when the systemd service is also set up).
-
-Copy `50-nova-pro.rules` to `/etc/udev/rules.d` and reload udev rules:
-
+### Uninstall
 ```bash
 sudo cp 50-nova-pro.rules /etc/udev/rules.d/
 
@@ -103,11 +102,13 @@ ChatMix should now work. You can toggle between volume and ChatMix by pressing t
 
 ## Details
 
+
 I started by installing SteelSeries GG and Sonar in a Windows 11 VM and passing through the base station USB device. On the Linux host I used Wireshark to see what happened when I enabled Sonar.
 
 This device uses USB HID events to both configure and receive data from the base station. I identified which ones enabled what features and tried activating these on Linux using the /dev/hidraw\* device. See `commands.sh` for more information.
 
 I am on MCU firmware version `01.29.27` and DSP firmware version `00.03.82`.
+
 
 ### Protocol description
 
