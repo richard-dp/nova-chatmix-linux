@@ -49,17 +49,17 @@ Clone this repo and cd into it
 
 ```bash
 cd nova-chatmix-linux
-## Copies nova.py to ~/.local/bin, adds udev rules, and creates/starts the systemd service for the user
+## Copies nova-chatmix.py to ~/.local/bin, adds udev rules, and creates/starts the systemd service for the user
 # You will be prompted for the root password where required
 ./scripts/install.sh
 ```
 
 ### Uninstall
 ```bash
-sudo cp 50-nova-pro.rules /etc/udev/rules.d/
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
+cd nova-chatmix-linux
+## Removes nova-chatmix.py from ~/.local/bin, removes udev rules, and removes/stops the systemd service for the user
+# You will be prompted for the root password where required
+./scripts/uninstall.sh
 ```
 
 If you want to run this script on startup you can add and enable the systemd service
