@@ -1,8 +1,7 @@
-# Arctis Nova Pro Wireless
+# Arctis Nova Pro - Wireless
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="12e0", TAG+="uaccess", ENV{SYSTEMD_USER_WANTS}="nova-chatmix.service"
-
-# Arctis Nova Pro Wireless (xbox variant)
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="12e5", TAG+="uaccess", ENV{SYSTEMD_USER_WANTS}="nova-chatmix.service"
 
-# Arctis Nova Pro
+# Arctis Nova Pro - Wired
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="12cb", TAG+="uaccess", ENV{SYSTEMD_USER_WANTS}="nova-chatmix.service"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="12cd", TAG+="uaccess", ENV{SYSTEMD_USER_WANTS}="nova-chatmix.service"

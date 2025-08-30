@@ -53,8 +53,8 @@ class ChatMix:
 class NovaProWireless:
     # USB VendorID
     VID = 0x1038
-    # USB PIDs for Acrtis Nova Pro Wireless & XBOX variant
-    PID_LIST = [0x12E0, 0x12E5, 0x12CB]
+    # USB ProductIDs for Acrtis Nova Pro Wireless & Wired
+    PID_LIST = [0x12E0, 0x12E5, 0x12CB, 0x12CD]
 
     # bInterfaceNumber
     INTERFACE = 0x4
