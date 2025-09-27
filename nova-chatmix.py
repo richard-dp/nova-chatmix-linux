@@ -12,9 +12,71 @@ CMD_PACTL = "pactl"
 CMD_PWLOOPBACK = "pw-loopback"
 
 
+class SinkInfo:
+
+    _COLUMN_COUNT = 5
+    _COLUMN_INDEX__SINK_ID = 0
+    _COLUMN_INDEX__NAME = 1
+    _COLUMN_INDEX__PROTOCOL = 2
+    _COLUMN_INDEX__AUDIO_METADATA = 3
+    _COLUMN_INDEX__STATE = 4
+
+    _METADATA_COLUMN_COUNT = 3
+    _METADATA_INDEX__SAMPLE_FORMAT = 0
+    _METADATA_INDEX__CHANNELS = 1
+    _METADATA_INDEX__SAMPLE_RATE = 2
+
+    def __init__(self, sink_id: int, name: str, protocol: str, sample_format: str, channels: str, sample_rate: str, state: str):
+        self.sink_id = sink_id
+        self.name = name
+        self.protocol = protocol
+        self.sample_format = sample_format
+
+        try:
+            self.channels = int(channels[:-2])
+        except ValueError:
+            raise Exception(f"Unable to parse channels for sink '{self.name}': '{channels}'")
+
+        try:
+            self.sample_rate = int(sample_rate[:-2])
+        except ValueError:
+            raise Exception(f"Unable to parse sample rate for '{self.name}': '{sample_rate}'")
+
+        self.state = state
+
+    @staticmethod
+    def _split_columns(line: str, seperator: str, expected_column_count: int):
+        columns = line.split(seperator)
+        column_count = len(columns)
+        if (expected_column_count != column_count):
+            raise Exception(f"""Unable to parse columns from '{CMD_PACTL} {' '.join(SinkInfo.CMD_ARGUMENTS)}'
+            {line}
+            Expected column count: {expected_column_count}
+            Received column count: {column_count}""")
+        return columns
+
+    @staticmethod
+    def from_line(line: str):
+        columns = SinkInfo._split_columns(line, "\t", SinkInfo._COLUMN_COUNT)
+        metadata_columns = SinkInfo._split_columns(columns[SinkInfo._COLUMN_INDEX__AUDIO_METADATA], " ", SinkInfo._METADATA_COLUMN_COUNT)
+        return SinkInfo(columns[SinkInfo._COLUMN_INDEX__SINK_ID]
+            , columns[SinkInfo._COLUMN_INDEX__NAME]
+            , columns[SinkInfo._COLUMN_INDEX__PROTOCOL]
+            , metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_FORMAT]
+            , metadata_columns[SinkInfo._METADATA_INDEX__CHANNELS]
+            , metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_RATE]
+            , columns[SinkInfo._COLUMN_INDEX__STATE]
+        )
+
+    @staticmethod
+    def ResolveList():
+        output_lines = check_output([CMD_PACTL, "list", "short", "sinks"]).decode().split("\n")
+        return [SinkInfo.from_line(line) for line in output_lines if line is not None and len(line) > 0]
+
+
 class ChatMix:
     # Create virtual pipewire sinks
-    def __init__(self, output_sink: str, main_sink: str, chat_sink: str):
+    def __init__(self, output_sink: SinkInfo, main_sink: str, chat_sink: str):
         self.main_sink = main_sink
         self.chat_sink = chat_sink
         self.main_sink_process = self._create_virtual_sink(main_sink, output_sink)
@@ -34,13 +96,20 @@ class ChatMix:
         self.main_sink_process.terminate()
         self.chat_sink_process.terminate()
 
-    def _create_virtual_sink(self, name: str, output_sink: str) -> Popen:
+    def _create_virtual_sink(self, name: str, output_sink: SinkInfo) -> Popen:
+        audio_prop_list = [
+            f"audio.format={output_sink.sample_format}",
+            f"audio.rate={output_sink.sample_rate}",
+            f"audio.channels={output_sink.channels}"
+        ]
+        audio_props = ','.join(audio_prop_list)
+
         return Popen(
             [
                 CMD_PWLOOPBACK,
                 "-P",
-                output_sink,
-                "--capture-props=media.class=Audio/Sink,audio.rate=44100,audio.channels=2",
+                output_sink.name,
+                f"--capture-props=media.class=Audio/Sink,{audio_props}",
                 "-n",
                 name,
             ]
@@ -116,13 +185,10 @@ class NovaProWireless:
 
         # Try to automatically detect output sink, this is skipped if output_sink is given
         if not output_sink:
-            sinks = (
-                check_output([CMD_PACTL, "list", "sinks", "short"]).decode().split("\n")
-            )
-            for sink in sinks[:-1]:
-                sink_name = sink.split("\t")[1]
-                if self.PW_OUTPUT_SINK_AUTODETECT in sink_name:
-                    output_sink = sink_name
+            sinks = SinkInfo.ResolveList()
+            for sink in sinks:
+                if self.PW_OUTPUT_SINK_AUTODETECT in sink.name:
+                    output_sink = sink
 
         self.dev = device()
         self.dev.open_path(devpath)
