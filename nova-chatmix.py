@@ -104,6 +104,12 @@ class ChatMix:
         ]
         audio_props = ','.join(audio_prop_list)
 
+        print(f"""
+            Creating virtual sink '{name}' with properties:
+                Format: {output_sink.sample_format}
+                Rate: {output_sink.sample_rate}
+                Channels: {output_sink.channels}
+        """)
         return Popen(
             [
                 CMD_PWLOOPBACK,
@@ -123,7 +129,13 @@ class NovaProWireless:
     # USB VendorID
     VID = 0x1038
     # USB ProductIDs for Acrtis Nova Pro Wireless & Wired
-    PID_LIST = [0x12E0, 0x12E5, 0x12CB, 0x12CD]
+    PID_LIST = [
+        0x12E0,
+        0x12E5,
+        0x12CB,
+        0x12CD,
+        0x220E
+    ]
 
     # bInterfaceNumber
     INTERFACE = 0x4
