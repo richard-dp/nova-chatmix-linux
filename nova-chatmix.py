@@ -13,7 +13,6 @@ CMD_PWLOOPBACK = "pw-loopback"
 
 
 class SinkInfo:
-
     _COLUMN_COUNT = 5
     _COLUMN_INDEX__SINK_ID = 0
     _COLUMN_INDEX__NAME = 1
@@ -26,7 +25,16 @@ class SinkInfo:
     _METADATA_INDEX__CHANNELS = 1
     _METADATA_INDEX__SAMPLE_RATE = 2
 
-    def __init__(self, sink_id: int, name: str, protocol: str, sample_format: str, channels: str, sample_rate: str, state: str):
+    def __init__(
+        self,
+        sink_id: int,
+        name: str,
+        protocol: str,
+        sample_format: str,
+        channels: str,
+        sample_rate: str,
+        state: str,
+    ):
         self.sink_id = sink_id
         self.name = name
         self.protocol = protocol
@@ -35,12 +43,16 @@ class SinkInfo:
         try:
             self.channels = int(channels[:-2])
         except ValueError:
-            raise Exception(f"Unable to parse channels for sink '{self.name}': '{channels}'")
+            raise Exception(
+                f"Unable to parse channels for sink '{self.name}': '{channels}'"
+            )
 
         try:
             self.sample_rate = int(sample_rate[:-2])
         except ValueError:
-            raise Exception(f"Unable to parse sample rate for '{self.name}': '{sample_rate}'")
+            raise Exception(
+                f"Unable to parse sample rate for '{self.name}': '{sample_rate}'"
+            )
 
         self.state = state
 
@@ -48,8 +60,8 @@ class SinkInfo:
     def _split_columns(line: str, seperator: str, expected_column_count: int):
         columns = line.split(seperator)
         column_count = len(columns)
-        if (expected_column_count != column_count):
-            raise Exception(f"""Unable to parse columns from '{CMD_PACTL} {' '.join(SinkInfo.CMD_ARGUMENTS)}'
+        if expected_column_count != column_count:
+            raise Exception(f"""Unable to parse columns from '{CMD_PACTL} {" ".join(SinkInfo.CMD_ARGUMENTS)}'
             {line}
             Expected column count: {expected_column_count}
             Received column count: {column_count}""")
@@ -58,20 +70,31 @@ class SinkInfo:
     @staticmethod
     def from_line(line: str):
         columns = SinkInfo._split_columns(line, "\t", SinkInfo._COLUMN_COUNT)
-        metadata_columns = SinkInfo._split_columns(columns[SinkInfo._COLUMN_INDEX__AUDIO_METADATA], " ", SinkInfo._METADATA_COLUMN_COUNT)
-        return SinkInfo(columns[SinkInfo._COLUMN_INDEX__SINK_ID]
-            , columns[SinkInfo._COLUMN_INDEX__NAME]
-            , columns[SinkInfo._COLUMN_INDEX__PROTOCOL]
-            , metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_FORMAT]
-            , metadata_columns[SinkInfo._METADATA_INDEX__CHANNELS]
-            , metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_RATE]
-            , columns[SinkInfo._COLUMN_INDEX__STATE]
+        metadata_columns = SinkInfo._split_columns(
+            columns[SinkInfo._COLUMN_INDEX__AUDIO_METADATA],
+            " ",
+            SinkInfo._METADATA_COLUMN_COUNT,
+        )
+        return SinkInfo(
+            columns[SinkInfo._COLUMN_INDEX__SINK_ID],
+            columns[SinkInfo._COLUMN_INDEX__NAME],
+            columns[SinkInfo._COLUMN_INDEX__PROTOCOL],
+            metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_FORMAT],
+            metadata_columns[SinkInfo._METADATA_INDEX__CHANNELS],
+            metadata_columns[SinkInfo._METADATA_INDEX__SAMPLE_RATE],
+            columns[SinkInfo._COLUMN_INDEX__STATE],
         )
 
     @staticmethod
     def ResolveList():
-        output_lines = check_output([CMD_PACTL, "list", "short", "sinks"]).decode().split("\n")
-        return [SinkInfo.from_line(line) for line in output_lines if line is not None and len(line) > 0]
+        output_lines = (
+            check_output([CMD_PACTL, "list", "short", "sinks"]).decode().split("\n")
+        )
+        return [
+            SinkInfo.from_line(line)
+            for line in output_lines
+            if line is not None and len(line) > 0
+        ]
 
 
 class ChatMix:
@@ -100,9 +123,9 @@ class ChatMix:
         audio_prop_list = [
             f"audio.format={output_sink.sample_format}",
             f"audio.rate={output_sink.sample_rate}",
-            f"audio.channels={output_sink.channels}"
+            f"audio.channels={output_sink.channels}",
         ]
-        audio_props = ','.join(audio_prop_list)
+        audio_props = ",".join(audio_prop_list)
 
         print(f"""
             Creating virtual sink '{name}' with properties:
@@ -129,13 +152,7 @@ class NovaProWireless:
     # USB VendorID
     VID = 0x1038
     # USB ProductIDs for Acrtis Nova Pro Wireless & Wired
-    PID_LIST = [
-        0x12E0,
-        0x12E5,
-        0x12CB,
-        0x12CD,
-        0x220E
-    ]
+    PID_LIST = [0x12E0, 0x12E5, 0x12CB, 0x12CD, 0x220E]
 
     # bInterfaceNumber
     INTERFACE = 0x4
@@ -299,8 +316,9 @@ class DeviceNotFoundException(Exception):
 if __name__ == "__main__":
     try:
         nova = NovaProWireless()
-        nova.set_sonar_icon(state=True)
-        nova.set_chatmix_controls(state=True)
+        # Disable sonar icon and chatmix enable messages
+        # nova.set_sonar_icon(state=True)
+        # nova.set_chatmix_controls(state=True)
 
         signal(SIGINT, nova.close)
         signal(SIGTERM, nova.close)
