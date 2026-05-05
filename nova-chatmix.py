@@ -184,7 +184,7 @@ class NovaProWireless:
 
     # PipeWire Names
     ## String used to automatically select output sink
-    PW_OUTPUT_SINK_AUTODETECT = "SteelSeries_Arctis_Nova_Pro"
+    PW_OUTPUT_SINK_AUTODETECT = "SteelSeries_Arctis_7"
     ## Names of virtual sound devices
     PW_GAME_SINK = "NovaGame"
     PW_CHAT_SINK = "NovaChat"
