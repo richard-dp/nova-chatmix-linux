@@ -158,7 +158,7 @@ class NovaProWireless:
     INTERFACE = 0x4
 
     # HID Message length
-    MSGLEN = 63
+    MSGLEN = 64
 
     # Message read timeout
     READ_TIMEOUT = 1000
@@ -261,12 +261,10 @@ class NovaProWireless:
         while not self.CLOSE:
             try:
                 msg = self.dev.read(self.MSGLEN, self.READ_TIMEOUT)
-                if not msg or msg[1] is not self.OPT_CHATMIX:
-                    continue
 
-                # 4th and 5th byte contain ChatMix data
-                gamevol = msg[2]
-                chatvol = msg[3]
+                # 2nd and 3rd byte contain ChatMix data
+                gamevol = msg[1]
+                chatvol = msg[2]
 
                 # Actually change volume. Everytime you turn the dial, both volumes are set to the correct level
                 chatmix.set_volumes(gamevol, chatvol)
