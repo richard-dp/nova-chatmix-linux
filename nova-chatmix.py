@@ -261,18 +261,12 @@ class NovaProWireless:
         while not self.CLOSE:
             try:
                 msg = self.dev.read(self.MSGLEN, self.READ_TIMEOUT)
-                if not msg:
+                if not msg or msg[0] != self.OPT_CHATMIX:
                     continue
 
                 # 2nd and 3rd byte contain ChatMix data
-                cmd = msg[0]
                 gamevol = msg[1]
                 chatvol = msg[2]
-                b4 = msg[3]
-                b5 = msg[4]
-                print(
-                    f"Cmd?: {cmd:03}[0x{cmd:02x}] Game: {gamevol:03}[0x{gamevol:02x}], Chat: {chatvol:03}[0x{chatvol:02x}], b4: {b4:03}[0x{b4:02x}], b5: {b5:03}[0x{b5:02x}]"
-                )
 
                 # Actually change volume. Everytime you turn the dial, both volumes are set to the correct level
                 chatmix.set_volumes(gamevol, chatvol)
