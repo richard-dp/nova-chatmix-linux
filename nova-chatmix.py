@@ -155,10 +155,10 @@ class NovaProWireless:
     PID_LIST = [0x12E0, 0x12E5, 0x12CB, 0x12CD, 0x220E]
 
     # bInterfaceNumber
-    INTERFACE = 0x7
+    INTERFACE = 0x5
 
     # HID Message length
-    MSGLEN = 63
+    MSGLEN = 64
 
     # Message read timeout
     READ_TIMEOUT = 1000
